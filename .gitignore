@@ -1,0 +1,22 @@
+# Environments
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+.env
+
+# Data (regenerable via yfinance, kept local only)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/external/.gitkeep
+
+# Models (can be large binary files)
+models/*.pkl
+models/*.joblib
+!models/.gitkeep
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+.vscode/
