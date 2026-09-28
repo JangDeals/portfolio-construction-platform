@@ -86,9 +86,12 @@ def render_out_of_sample_page():
         stats, cumulative = _compute_summary_stats(returns)
         summary_rows[name] = stats
         cumulative_series[name] = cumulative
-
+    
+    st.session_state["oos_summary"] = summary_rows
+    
     summary_df = pd.DataFrame(summary_rows).T
-    st.subheader("Out-of-Sample Performance (Walk-Forward, 2018–Present)")
+    oos_start_year = min(r.index[0] for r in oos_results.values()).year
+    st.subheader(f"Out-of-Sample Performance (Walk-Forward, {oos_start_year}–Present)")
     st.dataframe(summary_df.style.format({
         "Annualized Return": "{:.2%}", "Volatility": "{:.2%}",
         "Sharpe Ratio": "{:.3f}", "Max Drawdown": "{:.2%}",
@@ -105,6 +108,11 @@ def render_out_of_sample_page():
         in_sample_return = portfolio_expected_return(weights.values, annualized_returns)
         in_sample_vol = portfolio_volatility(weights.values, cov_matrix)
         in_sample_sharpe = sharpe_ratio(in_sample_return, in_sample_vol, risk_free_rate=0.02)
+        st.session_state["in_sample_metrics"] = {
+            "Annualized Return": in_sample_return,
+            "Volatility": in_sample_vol,
+            "Sharpe Ratio": in_sample_sharpe,
+        }
 
         oos_stats = summary_rows[selected_profile]
 
@@ -126,7 +134,7 @@ def render_out_of_sample_page():
             "reflects that these two figures cover genuinely different periods. "
             "In-sample spans the full 2008–present history (including weaker years "
             "for this profile's holdings), while out-of-sample reflects only the "
-            "annually re-optimized 2018–present walk-forward window, which happened "
+            "annually re-optimized 2019–present walk-forward window, which happened "
             "to favor this profile's growth tilt. The comparison's real value is "
             "confirming the methodology holds up on unseen data — not which number "
             "is bigger."

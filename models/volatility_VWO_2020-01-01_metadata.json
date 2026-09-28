@@ -1,6 +1,6 @@
 {
     "model_name": "volatility_VWO_2020-01-01",
-    "saved_timestamp": "2026-09-27T21:07:49.583278",
+    "saved_timestamp": "2026-09-28T12:16:18.217487",
     "feature_cols": [
         "trailing_vol_21d",
         "trailing_vol_60d",

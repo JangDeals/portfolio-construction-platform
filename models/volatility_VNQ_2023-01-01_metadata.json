@@ -1,6 +1,6 @@
 {
     "model_name": "volatility_VNQ_2023-01-01",
-    "saved_timestamp": "2026-09-27T21:07:50.211049",
+    "saved_timestamp": "2026-09-28T12:16:19.210529",
     "feature_cols": [
         "trailing_vol_21d",
         "trailing_vol_60d",

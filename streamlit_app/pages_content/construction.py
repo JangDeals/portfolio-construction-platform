@@ -59,6 +59,12 @@ def render_construction_page():
 
     st.session_state["portfolio_weights"] = result["weights"]
 
+    st.session_state["recommendation"] = result
+    # Invalidate results from later pages, so a profile change can never
+    # leave stale numbers behind for the report to pick up.
+    st.session_state["oos_summary"] = None
+    st.session_state["in_sample_metrics"] = None
+    
     st.subheader(f"Recommended Portfolio: {result['risk_profile']}")
     st.caption(result["rationale"])
 

@@ -14,6 +14,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2]))
 from src.backtesting.rebalancing_engine import compute_drifted_weights, compute_rebalancing_trades
 from src.risk.risk_engine import herfindahl_index
 from pages_content.construction import load_data_and_compute_inputs
+from src.utils.report_generator import build_portfolio_report
 
 
 def render_rebalancing_page():
@@ -69,6 +70,33 @@ def render_rebalancing_page():
 
     st.dataframe(trades_df.style.format({"Trade (Weight Change)": "{:+.2%}"}))
     st.metric("Total Turnover Required", f"{trade_result['turnover']:.2%}")
+
+    st.divider()
+    st.subheader("Download Report")
+
+    recommendation = st.session_state.get("recommendation")
+    if recommendation is not None:
+        report_md = build_portfolio_report(
+            risk_profile=recommendation["risk_profile"],
+            rationale=recommendation["rationale"],
+            weights=recommendation["weights"],
+            hhi=recommendation["hhi"],
+            rebalance_frequency=recommendation["recommended_rebalance_frequency"],
+            data_start=str(prices.index.min().date()),
+            data_end=str(prices.index.max().date()),
+            in_sample=st.session_state.get("in_sample_metrics"),
+            out_of_sample=st.session_state.get("oos_summary"),
+            drift_table=comparison_df,
+            drift_start=illustration_start,
+            trades_table=trades_df,
+            turnover=trade_result["turnover"],
+        )
+        st.download_button(
+            label="Download Portfolio Report (Markdown)",
+            data=report_md,
+            file_name=f"portfolio_report_{recommendation['risk_profile'].lower()}.md",
+            mime="text/markdown",
+        )
 
     st.divider()
     col1, col2 = st.columns(2)

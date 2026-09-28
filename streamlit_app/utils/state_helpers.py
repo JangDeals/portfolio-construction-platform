@@ -21,6 +21,9 @@ def initialize_session_state():
         "selected_method": None,
         "portfolio_weights": None,
         "backtest_results": None,
+        "recommendation": None,
+        "oos_summary": None,
+        "in_sample_metrics": None,
     }
     for key, default_value in defaults.items():
         if key not in st.session_state:

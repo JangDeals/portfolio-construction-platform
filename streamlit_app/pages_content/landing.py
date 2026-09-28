@@ -6,7 +6,7 @@ import streamlit as st
 
 
 def render_landing_page():
-    st.title("Multi-Asset Portfolio Construction Platform")
+    st.title("Institutional Portfolio Construction & Risk Analytics Platform")
     st.markdown("""
     Build, optimize, and analyze a diversified multi-asset portfolio using
     Modern Portfolio Theory, quantitative risk management, and historically
