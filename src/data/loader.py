@@ -9,13 +9,14 @@ from datetime import datetime
 from pathlib import Path
 import json
 
+# Add near the top of src/data/loader.py
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+
 from src.utils.paths import RAW_DATA_DIR
-
-
-# --- Configuration ---
-TICKERS = ["SPY", "QQQ", "VEA", "VWO", "IEF", "TLT", "SHY", "VNQ", "GLD"]
-START_DATE = "2008-01-01"
-END_DATE = datetime.today().strftime("%Y-%m-%d")
+from src.config import TICKERS, START_DATE, END_DATE
 
 
 def download_asset_data(tickers: list[str], start_date: str, end_date: str) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -42,15 +43,15 @@ def download_asset_data(tickers: list[str], start_date: str, end_date: str) -> t
     ValueError
         If any requested ticker returned no data.
     """
-    print(f"Downloading data for {len(tickers)} tickers: {tickers}")
-    print(f"Date range: {start_date} to {end_date}")
+    logger.info(f"Downloading data for {len(tickers)} tickers: {tickers}")
+    logger.info(f"Date range: {start_date} to {end_date}")
 
     raw_data = yf.download(
         tickers,
         start=start_date,
         end=end_date,
-        auto_adjust=True,   # adjusts for splits/dividends automatically
-        group_by="ticker",  # makes slicing per-ticker cleaner
+        auto_adjust=True,
+        group_by="ticker",
         progress=True,
     )
 
@@ -64,18 +65,16 @@ def download_asset_data(tickers: list[str], start_date: str, end_date: str) -> t
         for ticker in tickers
     })
 
-    # Drop any row that's completely empty across all tickers — this happens
-    # when end_date is today and the trading session hasn't closed yet, so
-    # yfinance includes today's date with no actual data behind it.
     close_prices = close_prices.dropna(how="any")
     volumes = volumes.loc[close_prices.index]
-    
+
     missing_tickers = [t for t in tickers if close_prices[t].isna().all()]
     if missing_tickers:
+        logger.error(f"No data returned for tickers: {missing_tickers}")
         raise ValueError(f"No data returned for tickers: {missing_tickers}")
 
-    print(f"Successfully downloaded data: {close_prices.shape[0]} rows, {close_prices.shape[1]} tickers")
-    print(f"Date range returned: {close_prices.index.min().date()} to {close_prices.index.max().date()}")
+    logger.info(f"Successfully downloaded data: {close_prices.shape[0]} rows, {close_prices.shape[1]} tickers")
+    logger.info(f"Date range returned: {close_prices.index.min().date()} to {close_prices.index.max().date()}")
 
     return close_prices, volumes
 
@@ -107,6 +106,6 @@ def save_raw_data(prices: pd.DataFrame, volumes: pd.DataFrame, tickers: list[str
     with open(metadata_path, "w") as f:
         json.dump(metadata, f, indent=4)
 
-    print(f"Saved price data to: {prices_path}")
-    print(f"Saved volume data to: {volumes_path}")
-    print(f"Saved metadata to: {metadata_path}")
+    logger.info(f"Saved price data to: {prices_path}")
+    logger.info(f"Saved volume data to: {volumes_path}")
+    logger.info(f"Saved metadata to: {metadata_path}")

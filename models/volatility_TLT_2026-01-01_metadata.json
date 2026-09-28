@@ -1,6 +1,6 @@
 {
     "model_name": "volatility_TLT_2026-01-01",
-    "saved_timestamp": "2026-09-27T11:01:53.096880",
+    "saved_timestamp": "2026-09-27T21:07:49.967462",
     "feature_cols": [
         "trailing_vol_21d",
         "trailing_vol_60d",

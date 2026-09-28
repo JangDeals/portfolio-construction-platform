@@ -1,6 +1,6 @@
 {
     "model_name": "volatility_SHY_2020-01-01",
-    "saved_timestamp": "2026-09-27T11:01:53.406269",
+    "saved_timestamp": "2026-09-27T21:07:50.036746",
     "feature_cols": [
         "trailing_vol_21d",
         "trailing_vol_60d",

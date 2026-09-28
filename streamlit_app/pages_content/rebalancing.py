@@ -30,10 +30,14 @@ def render_rebalancing_page():
     prices, simple_returns, annualized_returns, cov_matrix = load_data_and_compute_inputs()
 
     st.info(
-        "This is an illustrative simulation: it shows how YOUR recommended "
-        "weights would have drifted had they been held, untouched, since "
-        "3 years ago. It is not this portfolio's actual trading history, "
-        "since it was just constructed."
+    "This is an illustrative simulation using your portfolio's current, "
+    "in-sample-estimated weights: it shows how they would have drifted had "
+    "they been held, untouched, since 3 years ago. It is not this "
+    "portfolio's actual trading history. Note this differs from the "
+    "Out-of-Sample Validation page, which re-optimizes annually rather than "
+    "holding one fixed allocation — drift analysis and walk-forward "
+    "re-optimization are two different, complementary lenses, not "
+    "alternate versions of the same test."
     )
 
     illustration_start = (prices.index.max() - pd.DateOffset(years=3)).strftime("%Y-%m-%d")

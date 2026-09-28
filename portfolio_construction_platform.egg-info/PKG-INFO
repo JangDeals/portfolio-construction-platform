@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: portfolio-construction-platform
+Version: 0.1.0
+Summary: Multi-Asset Portfolio Construction, Optimization & Risk Analytics Platform
+Requires-Python: >=3.10

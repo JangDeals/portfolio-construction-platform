@@ -30,6 +30,14 @@ def get_efficient_frontier(annualized_returns, cov_matrix):
 def render_frontier_page():
     st.title("Efficient Frontier")
 
+    st.warning(
+    "⚠️ These metrics use the full historical dataset (2008–present) — the "
+    "same data used to estimate this portfolio's weights. This is an "
+    "in-sample illustration, not a validated forecast. See the "
+    "**Out-of-Sample Validation** page for how this exact risk-profile "
+    "methodology performed on data it never saw during estimation."
+    )
+    
     if st.session_state["portfolio_weights"] is None:
         st.error("Please construct a portfolio first.")
         if st.button("← Back to Construction"):
@@ -82,5 +90,5 @@ def render_frontier_page():
             st.rerun()
     with col2:
         if st.button("Continue →", type="primary"):
-            st.session_state["current_step"] = "rebalancing"
+            st.session_state["current_step"] = "out_of_sample"
             st.rerun()

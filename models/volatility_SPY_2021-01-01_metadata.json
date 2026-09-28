@@ -1,6 +1,6 @@
 {
     "model_name": "volatility_SPY_2021-01-01",
-    "saved_timestamp": "2026-09-27T11:01:52.302889",
+    "saved_timestamp": "2026-09-27T21:07:49.138790",
     "feature_cols": [
         "trailing_vol_21d",
         "trailing_vol_60d",

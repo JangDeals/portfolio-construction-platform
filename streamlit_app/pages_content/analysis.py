@@ -23,6 +23,14 @@ from pages_content.construction import load_data_and_compute_inputs
 def render_analysis_page():
     st.title("Risk & Performance Analysis")
 
+    st.warning(
+    "⚠️ These metrics use the full historical dataset (2008–present) — the "
+    "same data used to estimate this portfolio's weights. This is an "
+    "in-sample illustration, not a validated forecast. See the "
+    "**Out-of-Sample Validation** page for how this exact risk-profile "
+    "methodology performed on data it never saw during estimation."
+    )
+    
     if st.session_state["portfolio_weights"] is None:
         st.error("Please construct a portfolio first.")
         if st.button("← Back to Construction"):

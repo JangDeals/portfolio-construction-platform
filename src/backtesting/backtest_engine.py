@@ -149,3 +149,95 @@ def walk_forward_backtest(
         "rebalance_dates": rebalance_dates,
         "weights_history": weights_history,
     }
+    
+# Add to src/backtesting/backtest_engine.py
+
+def compute_turnover_cost(old_weights: pd.Series, new_weights: pd.Series, cost_per_unit_turnover: float = 0.001) -> float:
+    """
+    Compute transaction cost scaled by actual turnover, rather than a flat
+    per-rebalance charge.
+
+    Parameters
+    ----------
+    old_weights : pd.Series
+        Weights held immediately before this rebalance (already drifted).
+    new_weights : pd.Series
+        Newly computed target weights.
+    cost_per_unit_turnover : float, default 0.001
+        Cost assumption per unit of turnover (e.g. 0.001 = 10bps per 100%
+        of portfolio turned over).
+
+    Returns
+    -------
+    float
+        Total cost as a fraction of portfolio value.
+    """
+    turnover = (new_weights - old_weights).abs().sum() / 2
+    return turnover * cost_per_unit_turnover
+
+
+# Add to src/backtesting/backtest_engine.py
+
+def walk_forward_profile_backtest(
+    risk_profile: str,
+    simple_returns: pd.DataFrame,
+    tickers: list[str],
+    asset_class_map: dict,
+    initial_train_years: int = 10,
+    cost_per_unit_turnover: float = 0.001,
+) -> dict:
+    """
+    Walk-forward backtest of an ACTUAL constrained risk profile (as deployed
+    in the Streamlit app via recommend_portfolio), not a generic unconstrained
+    optimizer. Addresses the gap where Module 16 tested generic strategies
+    rather than the real, deployed profile constraints.
+
+    Parameters
+    ----------
+    risk_profile : str
+        "Conservative", "Moderate", or "Aggressive".
+    simple_returns : pd.DataFrame
+    tickers : list[str]
+    asset_class_map : dict
+    initial_train_years : int, default 10
+    cost_per_unit_turnover : float, default 0.001
+
+    Returns
+    -------
+    dict
+        oos_returns (pd.Series), weights_history (dict).
+    """
+    from src.portfolio.recommendation_engine import recommend_portfolio
+    from src.portfolio.portfolio_theory import calculate_annualized_covariance_matrix
+
+    start_date = simple_returns.index.min()
+    first_rebalance = start_date + pd.DateOffset(years=initial_train_years)
+    rebalance_dates = pd.date_range(start=first_rebalance, end=simple_returns.index.max(), freq="YS")
+
+    all_returns = []
+    weights_history = {}
+    previous_weights = pd.Series(0.0, index=tickers)  # start from cash, no prior position
+
+    for i, rebal_date in enumerate(rebalance_dates):
+        train_window = simple_returns[simple_returns.index < rebal_date]
+        next_date = rebalance_dates[i + 1] if i + 1 < len(rebalance_dates) else simple_returns.index.max() + pd.Timedelta(days=1)
+        test_window = simple_returns[(simple_returns.index >= rebal_date) & (simple_returns.index < next_date)]
+
+        if len(test_window) == 0 or len(train_window) < 100:
+            continue
+
+        annualized_returns = (1 + train_window).prod() ** (252 / len(train_window)) - 1
+        cov_matrix = calculate_annualized_covariance_matrix(train_window)
+
+        result = recommend_portfolio(risk_profile, annualized_returns, cov_matrix, tickers, asset_class_map)
+        new_weights = result["weights"]
+        weights_history[str(rebal_date.date())] = new_weights
+
+        cost = compute_turnover_cost(previous_weights, new_weights, cost_per_unit_turnover)
+        period_returns = test_window.dot(new_weights.values)
+        period_returns.iloc[0] -= cost
+
+        all_returns.append(period_returns)
+        previous_weights = new_weights  # for next iteration's turnover calc
+
+    return {"oos_returns": pd.concat(all_returns), "weights_history": weights_history}

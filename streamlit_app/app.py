@@ -19,6 +19,8 @@ from pages_content.construction import render_construction_page
 from pages_content.analysis import render_analysis_page
 from pages_content.frontier import render_frontier_page
 from pages_content.rebalancing import render_rebalancing_page
+from pages_content.out_of_sample import render_out_of_sample_page
+
 
 st.set_page_config(page_title="Portfolio Construction Platform", layout="wide")
 
@@ -38,7 +40,7 @@ elif step == "frontier":
     render_frontier_page()
 elif step == "rebalancing":
     render_rebalancing_page()
-elif step == "rebalancing":
-    st.write("Rebalancing — coming in the next step of this module")
+elif step == "out_of_sample":
+    render_out_of_sample_page()
 else:
     st.error(f"Unknown step: {step}")
